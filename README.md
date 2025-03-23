@@ -31,7 +31,7 @@ Este projeto é uma aplicação de chat em tempo real utilizando WebSockets para
 
    ```bash
    git clone https://github.com/Dogshihtzuamora/Cnet2Pwork
-   cd p2p-chat-app-v2
+   cd Cnet2Pwork
    ```
 
 2. Instale as dependências:
