@@ -324,11 +324,11 @@ body {
                 <span id="connection-status">Desconectado</span>
             </div>
         </div>
-
+        
         <div class="messages-container" id="messages">
             <div class="system-message">Bem-vindo ao Chat P2P! Aguardando conexão...</div>
         </div>
-
+        
         <div class="input-area">
             <input type="text" id="message-input" placeholder="Digite sua mensagem..." autocomplete="off">
             <button id="send-button">Enviar</button>
@@ -336,6 +336,7 @@ body {
     </div>
 
     <script>
+        
         const state = {
             username: 'Anônimo',
             connected: false,
@@ -343,6 +344,7 @@ body {
             messageId: 0
         };
 
+        
         const messagesContainer = document.getElementById('messages');
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
@@ -351,6 +353,7 @@ body {
         const statusIndicator = document.getElementById('status-indicator');
         const connectionStatus = document.getElementById('connection-status');
 
+        
         let socket;
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
@@ -369,6 +372,7 @@ body {
                 updateConnectionStatus();
                 addSystemMessage('Desconectado do servidor. Tentando reconectar...');
                 
+                
                 setTimeout(connectWebSocket, 3000);
             };
             
@@ -382,8 +386,11 @@ body {
             };
         }
 
+
+        
         connectWebSocket();
 
+        
         function handleIncomingMessage(data) {
             try {
                 const message = JSON.parse(data);
@@ -412,6 +419,7 @@ body {
                         break;
                         
                     case 'confirm':
+                        
                         console.log(`Mensagem enviada para ${message.sentTo} peers`);
                         break;
                 }
@@ -420,6 +428,7 @@ body {
             }
         }
 
+        
         function updateConnectionStatus() {
             if (state.connected) {
                 statusIndicator.classList.add('online');
@@ -432,6 +441,7 @@ body {
             }
         }
 
+        
         function addSystemMessage(text) {
             const messageElement = document.createElement('div');
             messageElement.className = 'system-message';
@@ -441,6 +451,7 @@ body {
             scrollToBottom();
         }
 
+        
         function addChatMessage(username, message, isSelf) {
             const messageElement = document.createElement('div');
             messageElement.className = isSelf ? 'message self' : 'message other';
@@ -460,15 +471,19 @@ body {
             scrollToBottom();
         }
 
+        
         function scrollToBottom() {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
+        
         function sendMessage() {
             const message = messageInput.value.trim();
             if (!message || !state.connected) return;
             
+            
             const messageId = Date.now() + '-' + state.messageId++;
+            
             
             socket.send(JSON.stringify({
                 type: 'chat',
@@ -477,11 +492,14 @@ body {
                 messageId: messageId
             }));
             
+            
             addChatMessage(state.username, message, true);
+            
             
             messageInput.value = '';
         }
 
+        
         sendButton.addEventListener('click', sendMessage);
         
         messageInput.addEventListener('keypress', function(event) {
@@ -499,7 +517,8 @@ body {
             }
         });
 
+        
         messageInput.focus();
     </script>
 </body>
-</html>
+  </html>
