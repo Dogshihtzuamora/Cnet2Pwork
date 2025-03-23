@@ -10,7 +10,6 @@
             --text-color: #e0e0e0;
             --primary-color: #ff9800;
             --secondary-color: #333;
-            --accent-color: #ff5722;
             --border-color: #444;
             --input-bg: #333;
             --button-bg: #ff9800;
@@ -21,6 +20,7 @@
             --message-other-bg: #333;
             --system-message-bg: #444;
             --header-bg: #1a1a1a;
+            --transition-duration: 0.3s;
         }
 
         * {
@@ -28,50 +28,90 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Roboto', sans-serif;
+            transition: all var(--transition-duration) ease;
         }
 
         body {
             background-color: var(--background-color);
             color: var(--text-color);
-            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            height: 100vh;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         .container {
-            max-width: 800px;
             width: 100%;
+            max-width: 500px;
             height: 90vh;
             display: flex;
             flex-direction: column;
             background-color: #1e1e1e;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            animation: slideInUp 1s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
         }
 
         .header {
-            padding: 15px 20px;
+            padding: 12px 15px;
             background-color: var(--header-bg);
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid var(--border-color);
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
+            animation: slideInRight 1s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
         }
 
         .username-area {
             display: flex;
-            align-items: center;
             gap: 10px;
+            animation: fadeInLeft 1s ease-out;
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .status-area {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             font-size: 14px;
             color: #bbb;
         }
@@ -81,6 +121,7 @@
             height: 12px;
             border-radius: 50%;
             background-color: var(--status-dot-offline);
+            transition: background-color var(--transition-duration) ease;
         }
 
         .status-dot.online {
@@ -90,92 +131,119 @@
         .messages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            padding-bottom: 60px;
+            gap: 12px;
             background-color: var(--secondary-color);
+            animation: fadeIn 1s ease-out;
         }
 
         .message {
-            max-width: 80%;
+            max-width: 85%;
             padding: 10px 15px;
-            border-radius: 15px;
+            border-radius: 12px;
             word-break: break-word;
-            font-size: 16px;
+            font-size: 14px;
             line-height: 1.5;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .message.self {
             align-self: flex-end;
             background-color: var(--message-self-bg);
             border-top-right-radius: 0;
+            animation: bounceIn 1s ease-out;
         }
 
         .message.other {
             align-self: flex-start;
             background-color: var(--message-other-bg);
             border-top-left-radius: 0;
+            animation: bounceIn 1s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.8);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
 
         .message-header {
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             margin-bottom: 5px;
+            color: var(--primary-color);
         }
 
         .message-content {
-            font-size: 16px;
+            font-size: 14px;
         }
 
         .system-message {
             align-self: center;
             color: #bbb;
-            font-size: 14px;
+            font-size: 13px;
             max-width: 80%;
             text-align: center;
-            padding: 10px 20px;
+            padding: 8px 18px;
             background-color: var(--system-message-bg);
-            border-radius: 15px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            animation: fadeInUp 0.8s ease-out;
         }
 
         .input-area {
             display: flex;
-            padding: 15px;
-            gap: 15px;
+            padding: 12px;
+            gap: 12px;
             background-color: var(--secondary-color);
             border-top: 2px solid var(--border-color);
-            align-items: center;
         }
 
         #message-input {
             flex: 1;
-            padding: 12px 15px;
+            padding: 10px 12px;
             background-color: var(--input-bg);
             border: 1px solid var(--border-color);
             border-radius: 20px;
             outline: none;
             color: var(--text-color);
-            font-size: 16px;
-            transition: background-color 0.3s ease;
+            font-size: 14px;
+            transition: all var(--transition-duration) ease;
         }
 
         #message-input:focus {
-            background-color: #444;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px var(--primary-color);
         }
 
         #send-button {
-            padding: 12px 25px;
+            padding: 10px 20px;
             background-color: var(--button-bg);
             color: white;
             border: none;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
+            font-size: 14px;
+            transition: background-color var(--transition-duration) ease;
         }
 
         #send-button:hover {
@@ -183,28 +251,69 @@
         }
 
         #username-input {
-            padding: 10px;
+            padding: 8px;
             background-color: var(--input-bg);
             border: 1px solid var(--border-color);
             border-radius: 5px;
             outline: none;
             color: var(--text-color);
-            font-size: 16px;
+            font-size: 14px;
         }
 
         #set-username {
-            padding: 10px 20px;
+            padding: 8px 16px;
             background-color: var(--primary-color);
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
+            font-size: 14px;
+            transition: background-color var(--transition-duration) ease;
         }
 
         #set-username:hover {
-            background-color: var(--accent-color);
+            background-color: var(--button-hover-bg);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                height: 95vh;
+                max-width: 100%;
+            }
+
+            .header {
+                flex-direction: column;
+                padding: 10px 15px;
+                gap: 10px;
+            }
+
+            .status-area {
+                font-size: 12px;
+            }
+
+            #message-input {
+                padding: 8px;
+                font-size: 13px;
+            }
+
+            #send-button {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+
+            .message {
+                font-size: 13px;
+                padding: 6px 10px;
+            }
+
+            .message-header {
+                font-size: 12px;
+            }
+
+            .system-message {
+                font-size: 12px;
+                padding: 6px 15px;
+            }
         }
     </style>
 </head>
@@ -360,42 +469,22 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        function sendMessage() {
+        sendButton.addEventListener('click', function() {
             const message = messageInput.value.trim();
-            if (!message || !state.connected) return;
-            
-            const messageId = Date.now() + '-' + state.messageId++;
-            
-            socket.send(JSON.stringify({
-                type: 'chat',
-                username: state.username,
-                message: message,
-                messageId: messageId
-            }));
-            
-            addChatMessage(state.username, message, true);
-            
-            messageInput.value = '';
-        }
-
-        sendButton.addEventListener('click', sendMessage);
-        
-        messageInput.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
+            if (message && state.connected) {
+                addChatMessage(state.username, message, true);
+                socket.send(JSON.stringify({ type: 'chat', message, username: state.username }));
+                messageInput.value = '';
             }
         });
-        
+
         setUsernameButton.addEventListener('click', function() {
-            const newUsername = usernameInput.value.trim();
-            if (newUsername) {
-                const oldUsername = state.username;
-                state.username = newUsername;
-                addSystemMessage(`Nome alterado de ${oldUsername} para ${newUsername}`);
+            const username = usernameInput.value.trim();
+            if (username) {
+                state.username = username;
+                addSystemMessage(`Nome de usuário alterado para: ${username}`);
             }
         });
-
-        messageInput.focus();
     </script>
 </body>
 </html>
