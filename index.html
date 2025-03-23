@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat P2P</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .username-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ccc;
+        }
+        
+        .status-dot.online {
+            background-color: #4CAF50;
+        }
+        
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 10px;
+            word-break: break-word;
+        }
+        
+        .message.self {
+            align-self: flex-end;
+            background-color: #e3f2fd;
+        }
+        
+        .message.other {
+            align-self: flex-start;
+            background-color: #f1f1f1;
+        }
+        
+        .message-header {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .message-content {
+            font-size: 16px;
+        }
+        
+        .system-message {
+            align-self: center;
+            color: #666;
+            font-size: 14px;
+            max-width: 80%;
+            text-align: center;
+            padding: 5px 10px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+        }
+        
+        .input-area {
+            display: flex;
+            padding: 10px;
+            gap: 10px;
+            border-top: 1px solid #eee;
+        }
+        
+        #message-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+        
+        #send-button {
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        
+        #send-button:hover {
+            background-color: #0b7dda;
+        }
+        
+        #username-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+        
+        #set-username {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="username-area">
+                <input type="text" id="username-input" placeholder="Seu nome" value="Anônimo">
+                <button id="set-username">Definir</button>
+            </div>
+            <div class="status-area">
+                <div class="status-dot" id="status-indicator"></div>
+                <span id="connection-status">Desconectado</span>
+            </div>
+        </div>
+        
+        <div class="messages-container" id="messages">
+            <div class="system-message">Bem-vindo ao Chat P2P! Aguardando conexão...</div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="message-input" placeholder="Digite sua mensagem..." autocomplete="off">
+            <button id="send-button">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        // Estado da aplicação
+        const state = {
+            username: 'Anônimo',
+            connected: false,
+            peers: 0,
+            messageId: 0
+        };
+
+        // Elementos DOM
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const usernameInput = document.getElementById('username-input');
+        const setUsernameButton = document.getElementById('set-username');
+        const statusIndicator = document.getElementById('status-indicator');
+        const connectionStatus = document.getElementById('connection-status');
+
+        // Conectar WebSocket
+        let socket;
+        function connectWebSocket() {
+            // Usar o protocolo correto (ws ou wss) dependendo se a página está em http ou https
+            const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+            const wsUrl = `${protocol}${window.location.host}`;
+            
+            socket = new WebSocket(wsUrl);
+            
+            socket.onopen = function() {
+                state.connected = true;
+                updateConnectionStatus();
+                addSystemMessage('Conectado ao servidor');
+            };
+            
+            socket.onclose = function() {
+                state.connected = false;
+                updateConnectionStatus();
+                addSystemMessage('Desconectado do servidor. Tentando reconectar...');
+                
+                // Tentar reconectar após 3 segundos
+                setTimeout(connectWebSocket, 3000);
+            };
+            
+            socket.onerror = function(error) {
+                console.error('Erro WebSocket:', error);
+                addSystemMessage('Erro na conexão. Tentando reconectar...');
+            };
+            
+            socket.onmessage = function(event) {
+                handleIncomingMessage(event.data);
+            };
+        }
+
+        // Iniciar conexão
+        connectWebSocket();
+
+        // Processar mensagens recebidas
+        function handleIncomingMessage(data) {
+            try {
+                const message = JSON.parse(data);
+                
+                switch (message.type) {
+                    case 'status':
+                        state.peers = message.connections;
+                        updateConnectionStatus();
+                        if (message.message) {
+                            addSystemMessage(message.message);
+                        }
+                        break;
+                        
+                    case 'peer':
+                        if (message.action === 'connected') {
+                            addSystemMessage(`Peer ${message.id} conectado`);
+                        } else if (message.action === 'disconnected') {
+                            addSystemMessage(`Peer ${message.id} desconectado`);
+                        }
+                        state.peers = message.total;
+                        updateConnectionStatus();
+                        break;
+                        
+                    case 'chat':
+                        addChatMessage(message.username, message.message, message.self === true);
+                        break;
+                        
+                    case 'confirm':
+                        // Mensagem enviada com sucesso
+                        console.log(`Mensagem enviada para ${message.sentTo} peers`);
+                        break;
+                }
+            } catch (error) {
+                console.error('Erro ao processar mensagem:', error);
+            }
+        }
+
+        // Atualizar indicador de status
+        function updateConnectionStatus() {
+            if (state.connected) {
+                statusIndicator.classList.add('online');
+                connectionStatus.textContent = state.peers > 0 
+                    ? `Conectado (${state.peers} peers)` 
+                    : 'Conectado (aguardando peers)';
+            } else {
+                statusIndicator.classList.remove('online');
+                connectionStatus.textContent = 'Desconectado';
+            }
+        }
+
+        // Adicionar mensagem do sistema
+        function addSystemMessage(text) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'system-message';
+            messageElement.textContent = text;
+            
+            messagesContainer.appendChild(messageElement);
+            scrollToBottom();
+        }
+
+        // Adicionar mensagem de chat
+        function addChatMessage(username, message, isSelf) {
+            const messageElement = document.createElement('div');
+            messageElement.className = isSelf ? 'message self' : 'message other';
+            
+            const headerElement = document.createElement('div');
+            headerElement.className = 'message-header';
+            headerElement.textContent = username;
+            
+            const contentElement = document.createElement('div');
+            contentElement.className = 'message-content';
+            contentElement.textContent = message;
+            
+            messageElement.appendChild(headerElement);
+            messageElement.appendChild(contentElement);
+            
+            messagesContainer.appendChild(messageElement);
+            scrollToBottom();
+        }
+
+        // Rolar para o final da área de mensagens
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Enviar mensagem
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || !state.connected) return;
+            
+            // Gerar ID único para a mensagem
+            const messageId = Date.now() + '-' + state.messageId++;
+            
+            // Enviar para o servidor
+            socket.send(JSON.stringify({
+                type: 'chat',
+                username: state.username,
+                message: message,
+                messageId: messageId
+            }));
+            
+            // Adicionar à tela (otimista)
+            addChatMessage(state.username, message, true);
+            
+            // Limpar o campo de entrada
+            messageInput.value = '';
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        setUsernameButton.addEventListener('click', function() {
+            const newUsername = usernameInput.value.trim();
+            if (newUsername) {
+                const oldUsername = state.username;
+                state.username = newUsername;
+                addSystemMessage(`Nome alterado de ${oldUsername} para ${newUsername}`);
+            }
+        });
+
+        // Focus inicial no campo de mensagem
+        messageInput.focus();
+    </script>
+</body>
+  </html>
