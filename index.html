@@ -229,10 +229,11 @@
             };
         }
 
-        // Iniciar conexão
+
+        
         connectWebSocket();
 
-        // Processar mensagens recebidas
+        
         function handleIncomingMessage(data) {
             try {
                 const message = JSON.parse(data);
@@ -261,7 +262,7 @@
                         break;
                         
                     case 'confirm':
-                        // Mensagem enviada com sucesso
+                        
                         console.log(`Mensagem enviada para ${message.sentTo} peers`);
                         break;
                 }
@@ -270,7 +271,7 @@
             }
         }
 
-        // Atualizar indicador de status
+        
         function updateConnectionStatus() {
             if (state.connected) {
                 statusIndicator.classList.add('online');
@@ -283,7 +284,7 @@
             }
         }
 
-        // Adicionar mensagem do sistema
+        
         function addSystemMessage(text) {
             const messageElement = document.createElement('div');
             messageElement.className = 'system-message';
@@ -293,7 +294,7 @@
             scrollToBottom();
         }
 
-        // Adicionar mensagem de chat
+        
         function addChatMessage(username, message, isSelf) {
             const messageElement = document.createElement('div');
             messageElement.className = isSelf ? 'message self' : 'message other';
@@ -313,20 +314,20 @@
             scrollToBottom();
         }
 
-        // Rolar para o final da área de mensagens
+        
         function scrollToBottom() {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Enviar mensagem
+        
         function sendMessage() {
             const message = messageInput.value.trim();
             if (!message || !state.connected) return;
             
-            // Gerar ID único para a mensagem
+            
             const messageId = Date.now() + '-' + state.messageId++;
             
-            // Enviar para o servidor
+            
             socket.send(JSON.stringify({
                 type: 'chat',
                 username: state.username,
@@ -334,14 +335,14 @@
                 messageId: messageId
             }));
             
-            // Adicionar à tela (otimista)
+            
             addChatMessage(state.username, message, true);
             
-            // Limpar o campo de entrada
+            
             messageInput.value = '';
         }
 
-        // Event listeners
+        
         sendButton.addEventListener('click', sendMessage);
         
         messageInput.addEventListener('keypress', function(event) {
@@ -359,7 +360,7 @@
             }
         });
 
-        // Focus inicial no campo de mensagem
+        
         messageInput.focus();
     </script>
 </body>
