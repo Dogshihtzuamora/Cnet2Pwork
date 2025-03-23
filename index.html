@@ -179,7 +179,7 @@
     </div>
 
     <script>
-        // Estado da aplicação
+        
         const state = {
             username: 'Anônimo',
             connected: false,
@@ -187,7 +187,7 @@
             messageId: 0
         };
 
-        // Elementos DOM
+        
         const messagesContainer = document.getElementById('messages');
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
@@ -196,10 +196,9 @@
         const statusIndicator = document.getElementById('status-indicator');
         const connectionStatus = document.getElementById('connection-status');
 
-        // Conectar WebSocket
+        
         let socket;
         function connectWebSocket() {
-            // Usar o protocolo correto (ws ou wss) dependendo se a página está em http ou https
             const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
             const wsUrl = `${protocol}${window.location.host}`;
             
@@ -216,7 +215,7 @@
                 updateConnectionStatus();
                 addSystemMessage('Desconectado do servidor. Tentando reconectar...');
                 
-                // Tentar reconectar após 3 segundos
+                
                 setTimeout(connectWebSocket, 3000);
             };
             
