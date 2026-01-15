@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>cnet2pwork</title>
+<title>P2P WhatsApp</title>
 <style>
 * {
   margin: 0;
@@ -313,7 +313,7 @@ body {
 <body>
 
 <div id="login">
-  <h2>cnet2pwork</h2>
+  <h2>🚀 P2P WhatsApp</h2>
   <img id="avatar-preview" alt="Preview">
   <input id="name" placeholder="Seu nome" maxlength="25">
   <input id="avatar" type="file" accept="image/*">
@@ -452,7 +452,8 @@ function initChat() {
   ws.onopen = () => {
     ws.send(JSON.stringify({
       type: 'join-room',
-      roomId: state.currentRoom
+      roomId: state.currentRoom,
+      userId: state.userId
     }))
   }
 
@@ -460,7 +461,16 @@ function initChat() {
     const data = JSON.parse(e.data)
 
     if (data.type === 'room-joined') {
-      document.getElementById('current-room').textContent = `Sala: ${data.roomId} (${data.peerCount} peers)`
+      document.getElementById('current-room').textContent = `Sala: ${data.roomId} (${data.connections} peers)`
+    }
+
+    if (data.type === 'peer') {
+      if (data.action === 'connected') {
+        console.log(`Peer conectado: ${data.id}`)
+      } else {
+        console.log(`Peer desconectado: ${data.id}`)
+      }
+      document.getElementById('current-room').textContent = `Sala: ${state.currentRoom} (${data.total} peers)`
     }
 
     if (data.type === 'chat') {
@@ -483,6 +493,7 @@ function send() {
 
   ws.send(JSON.stringify({
     type: 'chat',
+    msgId: crypto.randomUUID(),
     userId: state.userId,
     name: state.name,
     avatar: state.avatar,
@@ -523,7 +534,8 @@ document.getElementById('join-room').onclick = () => {
   
   ws.send(JSON.stringify({
     type: 'join-room',
-    roomId: roomId
+    roomId: roomId,
+    userId: state.userId
   }))
 }
 
@@ -533,7 +545,8 @@ document.getElementById('global-btn').onclick = () => {
   
   ws.send(JSON.stringify({
     type: 'join-room',
-    roomId: 'global'
+    roomId: 'global',
+    userId: state.userId
   }))
 }
 </script>
