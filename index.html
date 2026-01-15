@@ -3,21 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat P2P Criptografado</title>
+    <title>Chat P2P</title>
     <style>
-:root {
-    --bg: #0a0a0a;
-    --surface: #1a1a1a;
-    --surface-2: #242424;
-    --primary: #00ff88;
-    --primary-dark: #00cc6a;
-    --text: #e0e0e0;
-    --text-dim: #888;
-    --border: #333;
-    --message-self: #1e3a2f;
-    --message-other: #2a2a2a;
-}
-
 * {
     margin: 0;
     padding: 0;
@@ -26,81 +13,145 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    background: #0a0a0a;
+    color: #e0e0e0;
     height: 100vh;
     overflow: hidden;
 }
 
-.app {
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 350px;
+    background: #1a1a1a;
+    border-right: 1px solid #333;
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    max-width: 1200px;
-    margin: 0 auto;
 }
 
-.header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 15px 20px;
+.sidebar-header {
+    padding: 20px;
+    background: #111;
+    border-bottom: 1px solid #333;
+}
+
+.user-info {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
 }
 
-.user-config {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.avatar-selector {
+.avatar-upload {
     position: relative;
+    cursor: pointer;
 }
 
-.avatar-preview {
-    width: 45px;
-    height: 45px;
+.avatar {
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    background: var(--surface-2);
-    cursor: pointer;
+    background: #333;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 24px;
-    border: 2px solid var(--primary);
-    transition: transform 0.2s;
+    border: 2px solid #00ff88;
 }
 
-.avatar-preview:hover {
-    transform: scale(1.1);
-}
-
-.avatar-preview img {
+.avatar img {
     width: 100%;
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
 }
 
-#avatar-input {
-    display: none;
-}
-
-#username-input {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    padding: 10px 15px;
+.username-input {
+    flex: 1;
+    background: #242424;
+    border: 1px solid #333;
+    padding: 10px;
     border-radius: 8px;
-    color: var(--text);
+    color: #e0e0e0;
     outline: none;
-    font-size: 14px;
-    width: 150px;
 }
 
-#username-input:focus {
-    border-color: var(--primary);
+.rooms-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.rooms-header h3 {
+    font-size: 14px;
+    color: #888;
+}
+
+.new-room-btn {
+    background: #00ff88;
+    color: #000;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.rooms-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.room-item {
+    padding: 15px 20px;
+    border-bottom: 1px solid #222;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.room-item:hover {
+    background: #242424;
+}
+
+.room-item.active {
+    background: #1e3a2f;
+    border-left: 3px solid #00ff88;
+}
+
+.room-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.room-info {
+    font-size: 12px;
+    color: #888;
+}
+
+.chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #0a0a0a;
+}
+
+.chat-header {
+    padding: 20px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.room-title {
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .status {
@@ -108,7 +159,7 @@ body {
     align-items: center;
     gap: 8px;
     font-size: 13px;
-    color: var(--text-dim);
+    color: #888;
 }
 
 .status-dot {
@@ -116,16 +167,11 @@ body {
     height: 10px;
     border-radius: 50%;
     background: #666;
-    animation: pulse 2s infinite;
 }
 
 .status-dot.online {
-    background: var(--primary);
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    background: #00ff88;
+    box-shadow: 0 0 10px #00ff88;
 }
 
 .messages {
@@ -134,12 +180,12 @@ body {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 .message {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     max-width: 70%;
     animation: slideIn 0.3s ease;
 }
@@ -149,10 +195,6 @@ body {
         opacity: 0;
         transform: translateY(10px);
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .message.self {
@@ -161,14 +203,14 @@ body {
 }
 
 .message-avatar {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
-    background: var(--surface-2);
+    background: #333;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 16px;
     flex-shrink: 0;
 }
 
@@ -185,155 +227,359 @@ body {
 
 .message-header {
     font-size: 12px;
-    color: var(--text-dim);
+    color: #888;
     margin-bottom: 4px;
     display: flex;
     gap: 8px;
-    align-items: center;
-}
-
-.message-time {
-    font-size: 11px;
 }
 
 .message-bubble {
-    background: var(--message-other);
-    padding: 12px 16px;
+    background: #2a2a2a;
+    padding: 10px 14px;
     border-radius: 12px;
     word-wrap: break-word;
-    line-height: 1.4;
+    position: relative;
 }
 
 .message.self .message-bubble {
-    background: var(--message-self);
+    background: #1e3a2f;
 }
 
-.system-message {
+.reply-indicator {
+    background: #1a1a1a;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    border-left: 3px solid #00ff88;
+    font-size: 12px;
+    color: #888;
+}
+
+.system-msg {
     text-align: center;
-    color: var(--text-dim);
+    color: #666;
     font-size: 12px;
     padding: 8px;
-    margin: 8px 0;
 }
 
 .input-area {
-    background: var(--surface);
-    border-top: 1px solid var(--border);
+    background: #1a1a1a;
+    border-top: 1px solid #333;
     padding: 15px 20px;
+}
+
+.reply-preview {
+    background: #242424;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.reply-preview.active {
+    display: flex;
+}
+
+.reply-text {
+    font-size: 13px;
+    color: #888;
+}
+
+.cancel-reply {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.input-wrapper {
     display: flex;
     gap: 10px;
 }
 
-#message-input {
+.message-input {
     flex: 1;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
+    background: #242424;
+    border: 1px solid #333;
     padding: 12px 16px;
     border-radius: 24px;
-    color: var(--text);
+    color: #e0e0e0;
     outline: none;
     font-size: 14px;
 }
 
-#message-input:focus {
-    border-color: var(--primary);
-}
-
-#send-btn {
-    background: var(--primary);
+.send-btn {
+    background: #00ff88;
     color: #000;
     border: none;
     padding: 12px 24px;
     border-radius: 24px;
     cursor: pointer;
     font-weight: 600;
-    font-size: 14px;
     transition: background 0.2s;
 }
 
-#send-btn:hover {
-    background: var(--primary-dark);
-}
-
-#send-btn:active {
+.send-btn:active {
     transform: scale(0.95);
 }
 
-.messages::-webkit-scrollbar {
-    width: 8px;
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
 }
 
-.messages::-webkit-scrollbar-track {
-    background: var(--surface);
+.modal.active {
+    display: flex;
 }
 
-.messages::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 4px;
+.modal-content {
+    background: #1a1a1a;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
 }
 
-.messages::-webkit-scrollbar-thumb:hover {
-    background: var(--text-dim);
+.modal-content h2 {
+    margin-bottom: 20px;
+}
+
+.modal-input {
+    width: 100%;
+    background: #242424;
+    border: 1px solid #333;
+    padding: 12px;
+    border-radius: 8px;
+    color: #e0e0e0;
+    margin-bottom: 15px;
+    outline: none;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.modal-btn.primary {
+    background: #00ff88;
+    color: #000;
+}
+
+.modal-btn.secondary {
+    background: #333;
+    color: #e0e0e0;
 }
 
 @media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        position: absolute;
+        z-index: 10;
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
     .message {
         max-width: 85%;
     }
-    
-    #username-input {
-        width: 120px;
-    }
+}
+
+.messages::-webkit-scrollbar,
+.rooms-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages::-webkit-scrollbar-track,
+.rooms-list::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+.messages::-webkit-scrollbar-thumb,
+.rooms-list::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
+
+.context-menu {
+    position: absolute;
+    background: #242424;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 5px 0;
+    display: none;
+    z-index: 1000;
+}
+
+.context-menu.active {
+    display: block;
+}
+
+.context-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.context-item:hover {
+    background: #333;
 }
     </style>
 </head>
 <body>
-    <div class="app">
-        <div class="header">
-            <div class="user-config">
-                <div class="avatar-selector">
-                    <div class="avatar-preview" id="avatar-preview">
-                        👤
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-info">
+                    <div class="avatar-upload" onclick="document.getElementById('avatar-input').click()">
+                        <div class="avatar" id="user-avatar">👤</div>
                     </div>
-                    <input type="file" id="avatar-input" accept="image/*">
+                    <input type="file" id="avatar-input" accept="image/*" style="display:none">
+                    <input type="text" class="username-input" id="username" placeholder="Seu nome" value="">
                 </div>
-                <input type="text" id="username-input" placeholder="Seu nome" value="Anônimo">
+                <div class="rooms-header">
+                    <h3>SALAS</h3>
+                    <button class="new-room-btn" onclick="openNewRoomModal()">+ Nova Sala</button>
+                </div>
             </div>
-            <div class="status">
-                <div class="status-dot" id="status-dot"></div>
-                <span id="status-text">Conectando...</span>
-            </div>
+            <div class="rooms-list" id="rooms-list"></div>
         </div>
 
-        <div class="messages" id="messages">
-            <div class="system-message">🔒 Chat P2P criptografado iniciado</div>
-        </div>
+        <div class="chat-area">
+            <div class="chat-header">
+                <div>
+                    <div class="room-title" id="current-room-name">Selecione uma sala</div>
+                </div>
+                <div class="status">
+                    <div class="status-dot" id="status-dot"></div>
+                    <span id="status-text">Desconectado</span>
+                </div>
+            </div>
 
-        <div class="input-area">
-            <input type="text" id="message-input" placeholder="Digite sua mensagem...">
-            <button id="send-btn">Enviar</button>
+            <div class="messages" id="messages"></div>
+
+            <div class="input-area">
+                <div class="reply-preview" id="reply-preview">
+                    <div class="reply-text" id="reply-text"></div>
+                    <button class="cancel-reply" onclick="cancelReply()">✕</button>
+                </div>
+                <div class="input-wrapper">
+                    <input type="text" class="message-input" id="message-input" placeholder="Digite uma mensagem...">
+                    <button class="send-btn" onclick="sendMessage()">Enviar</button>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <div class="modal" id="new-room-modal">
+        <div class="modal-content">
+            <h2>Nova Sala</h2>
+            <input type="text" class="modal-input" id="room-name-input" placeholder="Nome da sala">
+            <input type="password" class="modal-input" id="room-password-input" placeholder="Senha (opcional)">
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeNewRoomModal()">Cancelar</button>
+                <button class="modal-btn primary" onclick="createRoom()">Criar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="context-menu" id="context-menu">
+        <div class="context-item" onclick="replyToMessage()">Responder</div>
     </div>
 
     <script>
 const state = {
-    username: 'Anônimo',
-    avatar: null,
-    connected: false,
-    peers: 0,
-    ws: null
+    userId: localStorage.getItem('userId') || crypto.randomUUID(),
+    username: localStorage.getItem('username') || 'Anônimo',
+    avatar: localStorage.getItem('avatar') || null,
+    currentRoom: 'global',
+    rooms: JSON.parse(localStorage.getItem('rooms') || '{"global":{"name":"Global","password":null,"messages":[]}}'),
+    replyTo: null,
+    ws: null,
+    connected: false
 }
 
-const els = {
-    messages: document.getElementById('messages'),
-    input: document.getElementById('message-input'),
-    sendBtn: document.getElementById('send-btn'),
-    usernameInput: document.getElementById('username-input'),
-    avatarInput: document.getElementById('avatar-input'),
-    avatarPreview: document.getElementById('avatar-preview'),
-    statusDot: document.getElementById('status-dot'),
-    statusText: document.getElementById('status-text')
+localStorage.setItem('userId', state.userId)
+
+document.getElementById('username').value = state.username
+
+function compressImage(file, maxSizeMB = 2) {
+    return new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            const img = new Image()
+            img.onload = () => {
+                const canvas = document.createElement('canvas')
+                let width = img.width
+                let height = img.height
+                const maxDim = 800
+                
+                if (width > height && width > maxDim) {
+                    height = (height * maxDim) / width
+                    width = maxDim
+                } else if (height > maxDim) {
+                    width = (width * maxDim) / height
+                    height = maxDim
+                }
+                
+                canvas.width = width
+                canvas.height = height
+                const ctx = canvas.getContext('2d')
+                ctx.drawImage(img, 0, 0, width, height)
+                
+                let quality = 0.8
+                let result = canvas.toDataURL('image/jpeg', quality)
+                
+                while (result.length > maxSizeMB * 1024 * 1024 && quality > 0.1) {
+                    quality -= 0.1
+                    result = canvas.toDataURL('image/jpeg', quality)
+                }
+                
+                resolve(result)
+            }
+            img.src = e.target.result
+        }
+        reader.readAsDataURL(file)
+    })
 }
+
+document.getElementById('avatar-input').addEventListener('change', async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    
+    const compressed = await compressImage(file, 2)
+    state.avatar = compressed
+    localStorage.setItem('avatar', compressed)
+    document.getElementById('user-avatar').innerHTML = `<img src="${compressed}">`
+})
+
+document.getElementById('username').addEventListener('change', (e) => {
+    state.username = e.target.value.trim() || 'Anônimo'
+    localStorage.setItem('username', state.username)
+})
 
 function connectWS() {
     const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
@@ -342,6 +588,8 @@ function connectWS() {
     state.ws.onopen = () => {
         state.connected = true
         updateStatus('Conectado', true)
+        sendToServer({ type: 'join', room: state.currentRoom, userId: state.userId })
+        syncMessages()
     }
     
     state.ws.onclose = () => {
@@ -350,81 +598,88 @@ function connectWS() {
         setTimeout(connectWS, 3000)
     }
     
-    state.ws.onerror = (err) => {
-        console.error('WebSocket error:', err)
-    }
-    
     state.ws.onmessage = (e) => {
-        try {
-            const data = JSON.parse(e.data)
-            handleMessage(data)
-        } catch (err) {
-            console.error('Parse error:', err)
-        }
+        const data = JSON.parse(e.data)
+        handleMessage(data)
     }
 }
 
 function handleMessage(data) {
     switch(data.type) {
         case 'init':
-            state.peers = data.peers
             updateStatus(`Conectado (${data.peers} peers)`, true)
             break
-            
         case 'peer':
-            state.peers = data.total
             updateStatus(`Conectado (${data.total} peers)`, true)
-            if(data.action === 'join') {
-                addSystemMsg(`Novo peer conectado`)
+            break
+        case 'chat':
+            if (data.room === state.currentRoom) {
+                addMessage(data)
+            }
+            saveMessage(data)
+            break
+        case 'sync':
+            if (data.messages) {
+                data.messages.forEach(msg => saveMessage(msg))
+                renderMessages()
             }
             break
-            
-        case 'chat':
-            addMessage(data.username, data.message, data.avatar, false)
-            break
     }
+}
+
+function saveMessage(msg) {
+    if (!state.rooms[msg.room]) {
+        state.rooms[msg.room] = { name: msg.room, password: null, messages: [] }
+    }
+    if (!state.rooms[msg.room].messages.find(m => m.id === msg.id)) {
+        state.rooms[msg.room].messages.push(msg)
+        localStorage.setItem('rooms', JSON.stringify(state.rooms))
+    }
+}
+
+function syncMessages() {
+    const roomMsgs = state.rooms[state.currentRoom]?.messages || []
+    sendToServer({ type: 'sync', room: state.currentRoom, messages: roomMsgs })
 }
 
 function updateStatus(text, online) {
-    els.statusText.textContent = text
-    if(online) {
-        els.statusDot.classList.add('online')
-    } else {
-        els.statusDot.classList.remove('online')
-    }
+    document.getElementById('status-text').textContent = text
+    document.getElementById('status-dot').classList.toggle('online', online)
 }
 
-function addSystemMsg(text) {
+function addMessage(msg) {
     const div = document.createElement('div')
-    div.className = 'system-message'
-    div.textContent = text
-    els.messages.appendChild(div)
-    scrollToBottom()
-}
-
-function addMessage(username, message, avatar, isSelf) {
-    const div = document.createElement('div')
-    div.className = `message ${isSelf ? 'self' : ''}`
+    div.className = `message ${msg.userId === state.userId ? 'self' : ''}`
+    div.dataset.id = msg.id
+    div.oncontextmenu = (e) => showContextMenu(e, msg)
     
-    const time = new Date().toLocaleTimeString('pt-BR', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-    })
+    const time = new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    
+    let replyHtml = ''
+    if (msg.replyTo) {
+        const original = state.rooms[state.currentRoom]?.messages.find(m => m.id === msg.replyTo)
+        if (original) {
+            replyHtml = `<div class="reply-indicator">${original.username}: ${original.message.substring(0, 50)}...</div>`
+        }
+    }
     
     div.innerHTML = `
         <div class="message-avatar">
-            ${avatar ? `<img src="${avatar}" alt="avatar">` : '👤'}
+            ${msg.avatar ? `<img src="${msg.avatar}">` : '👤'}
         </div>
         <div class="message-content">
             <div class="message-header">
-                <strong>${username}</strong>
-                <span class="message-time">${time}</span>
+                <strong>${msg.username}</strong>
+                <span>${time}</span>
             </div>
-            <div class="message-bubble">${escapeHtml(message)}</div>
+            <div class="message-bubble">
+                ${replyHtml}
+                ${escapeHtml(msg.message)}
+            </div>
         </div>
     `
     
-    els.messages.appendChild(div)
+    document.getElementById('messages').appendChild(div)
     scrollToBottom()
 }
 
@@ -435,63 +690,137 @@ function escapeHtml(text) {
 }
 
 function scrollToBottom() {
-    els.messages.scrollTop = els.messages.scrollHeight
+    const msgs = document.getElementById('messages')
+    msgs.scrollTop = msgs.scrollHeight
 }
 
 function sendMessage() {
-    const msg = els.input.value.trim()
-    if(!msg || !state.connected) return
+    const input = document.getElementById('message-input')
+    const msg = input.value.trim()
+    if (!msg || !state.connected) return
     
-    state.ws.send(JSON.stringify({
+    const message = {
         type: 'chat',
+        id: crypto.randomUUID(),
+        room: state.currentRoom,
+        userId: state.userId,
         username: state.username,
-        message: msg,
         avatar: state.avatar,
-        messageId: Date.now()
-    }))
+        message: msg,
+        timestamp: Date.now(),
+        replyTo: state.replyTo
+    }
     
-    addMessage(state.username, msg, state.avatar, true)
-    els.input.value = ''
+    sendToServer(message)
+    addMessage(message)
+    saveMessage(message)
+    
+    input.value = ''
+    cancelReply()
 }
 
-els.sendBtn.addEventListener('click', sendMessage)
-
-els.input.addEventListener('keypress', (e) => {
-    if(e.key === 'Enter') sendMessage()
-})
-
-els.usernameInput.addEventListener('change', (e) => {
-    const newName = e.target.value.trim()
-    if(newName) {
-        state.username = newName
-        addSystemMsg(`Nome alterado para ${newName}`)
+function sendToServer(data) {
+    if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+        state.ws.send(JSON.stringify(data))
     }
+}
+
+document.getElementById('message-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage()
 })
 
-els.avatarPreview.addEventListener('click', () => {
-    els.avatarInput.click()
+function showContextMenu(e, msg) {
+    e.preventDefault()
+    const menu = document.getElementById('context-menu')
+    menu.style.left = e.pageX + 'px'
+    menu.style.top = e.pageY + 'px'
+    menu.classList.add('active')
+    menu.dataset.msgId = msg.id
+}
+
+document.addEventListener('click', () => {
+    document.getElementById('context-menu').classList.remove('active')
 })
 
-els.avatarInput.addEventListener('change', (e) => {
-    const file = e.target.files[0]
-    if(!file) return
+function replyToMessage() {
+    const msgId = document.getElementById('context-menu').dataset.msgId
+    const msg = state.rooms[state.currentRoom]?.messages.find(m => m.id === msgId)
+    if (!msg) return
     
-    if(file.size > 500000) {
-        alert('Imagem muito grande! Max 500KB')
-        return
-    }
-    
-    const reader = new FileReader()
-    reader.onload = (e) => {
-        state.avatar = e.target.result
-        els.avatarPreview.innerHTML = `<img src="${e.target.result}" alt="avatar">`
-        addSystemMsg('Avatar atualizado')
-    }
-    reader.readAsDataURL(file)
-})
+    state.replyTo = msgId
+    document.getElementById('reply-text').textContent = `${msg.username}: ${msg.message.substring(0, 50)}...`
+    document.getElementById('reply-preview').classList.add('active')
+    document.getElementById('message-input').focus()
+}
 
+function cancelReply() {
+    state.replyTo = null
+    document.getElementById('reply-preview').classList.remove('active')
+}
+
+function openNewRoomModal() {
+    document.getElementById('new-room-modal').classList.add('active')
+}
+
+function closeNewRoomModal() {
+    document.getElementById('new-room-modal').classList.remove('active')
+}
+
+function createRoom() {
+    const name = document.getElementById('room-name-input').value.trim()
+    const password = document.getElementById('room-password-input').value
+    
+    if (!name) return
+    
+    const roomId = name.toLowerCase().replace(/\s+/g, '-')
+    state.rooms[roomId] = { name, password, messages: [] }
+    localStorage.setItem('rooms', JSON.stringify(state.rooms))
+    
+    closeNewRoomModal()
+    renderRooms()
+    switchRoom(roomId)
+}
+
+function renderRooms() {
+    const list = document.getElementById('rooms-list')
+    list.innerHTML = ''
+    
+    Object.entries(state.rooms).forEach(([id, room]) => {
+        const div = document.createElement('div')
+        div.className = `room-item ${id === state.currentRoom ? 'active' : ''}`
+        div.onclick = () => switchRoom(id)
+        div.innerHTML = `
+            <div class="room-name">${room.name}</div>
+            <div class="room-info">${room.messages.length} mensagens</div>
+        `
+        list.appendChild(div)
+    })
+}
+
+function switchRoom(roomId) {
+    state.currentRoom = roomId
+    document.getElementById('current-room-name').textContent = state.rooms[roomId].name
+    renderRooms()
+    renderMessages()
+    if (state.connected) {
+        sendToServer({ type: 'join', room: roomId, userId: state.userId })
+        syncMessages()
+    }
+}
+
+function renderMessages() {
+    document.getElementById('messages').innerHTML = ''
+    const msgs = state.rooms[state.currentRoom]?.messages || []
+    msgs.forEach(msg => addMessage(msg))
+}
+
+if (state.avatar) {
+    document.getElementById('user-avatar').innerHTML = `<img src="${state.avatar}">`
+}
+
+renderRooms()
+switchRoom('global')
 connectWS()
-els.input.focus()
     </script>
 </body>
 </html>
