@@ -25,11 +25,14 @@ body {
 }
 
 .sidebar {
-    width: 350px;
+    width: 100%;
     background: #1a1a1a;
-    border-right: 1px solid #333;
     display: flex;
     flex-direction: column;
+}
+
+.sidebar.hidden {
+    display: none;
 }
 
 .sidebar-header {
@@ -81,17 +84,17 @@ body {
 
 .rooms-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    gap: 10px;
     margin-top: 10px;
 }
 
 .rooms-header h3 {
     font-size: 14px;
     color: #888;
+    flex: 1;
 }
 
-.new-room-btn {
+.header-btn {
     background: #00ff88;
     color: #000;
     border: none;
@@ -100,6 +103,11 @@ body {
     cursor: pointer;
     font-size: 12px;
     font-weight: 600;
+}
+
+.header-btn.secondary {
+    background: #333;
+    color: #e0e0e0;
 }
 
 .rooms-list {
@@ -118,14 +126,18 @@ body {
     background: #242424;
 }
 
-.room-item.active {
-    background: #1e3a2f;
-    border-left: 3px solid #00ff88;
-}
-
 .room-name {
     font-weight: 600;
     margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.room-id {
+    font-size: 10px;
+    color: #666;
+    font-family: monospace;
 }
 
 .room-info {
@@ -134,10 +146,14 @@ body {
 }
 
 .chat-area {
-    flex: 1;
-    display: flex;
+    width: 100%;
+    display: none;
     flex-direction: column;
     background: #0a0a0a;
+}
+
+.chat-area.active {
+    display: flex;
 }
 
 .chat-header {
@@ -147,6 +163,21 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    color: #00ff88;
+    font-size: 24px;
+    cursor: pointer;
+    margin-right: 15px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .room-title {
@@ -186,7 +217,7 @@ body {
 .message {
     display: flex;
     gap: 10px;
-    max-width: 70%;
+    max-width: 85%;
     animation: slideIn 0.3s ease;
 }
 
@@ -333,7 +364,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.9);
     align-items: center;
     justify-content: center;
     z-index: 1000;
@@ -366,6 +397,20 @@ body {
     outline: none;
 }
 
+.modal-info {
+    background: #242424;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 12px;
+    color: #888;
+    word-break: break-all;
+}
+
+.modal-info strong {
+    color: #00ff88;
+}
+
 .modal-buttons {
     display: flex;
     gap: 10px;
@@ -388,40 +433,6 @@ body {
 .modal-btn.secondary {
     background: #333;
     color: #e0e0e0;
-}
-
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        position: absolute;
-        z-index: 10;
-        transform: translateX(-100%);
-        transition: transform 0.3s;
-    }
-    
-    .sidebar.active {
-        transform: translateX(0);
-    }
-    
-    .message {
-        max-width: 85%;
-    }
-}
-
-.messages::-webkit-scrollbar,
-.rooms-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.messages::-webkit-scrollbar-track,
-.rooms-list::-webkit-scrollbar-track {
-    background: #1a1a1a;
-}
-
-.messages::-webkit-scrollbar-thumb,
-.rooms-list::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 3px;
 }
 
 .context-menu {
@@ -447,11 +458,46 @@ body {
 .context-item:hover {
     background: #333;
 }
+
+@media (min-width: 769px) {
+    .sidebar {
+        width: 350px;
+        border-right: 1px solid #333;
+    }
+    
+    .sidebar.hidden {
+        display: flex;
+    }
+    
+    .back-btn {
+        display: none;
+    }
+    
+    .message {
+        max-width: 70%;
+    }
+}
+
+.messages::-webkit-scrollbar,
+.rooms-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages::-webkit-scrollbar-track,
+.rooms-list::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+.messages::-webkit-scrollbar-thumb,
+.rooms-list::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="user-info">
                     <div class="avatar-upload" onclick="document.getElementById('avatar-input').click()">
@@ -462,16 +508,20 @@ body {
                 </div>
                 <div class="rooms-header">
                     <h3>SALAS</h3>
-                    <button class="new-room-btn" onclick="openNewRoomModal()">+ Nova Sala</button>
+                    <button class="header-btn" onclick="openNewRoomModal()">+ Nova</button>
+                    <button class="header-btn secondary" onclick="openJoinRoomModal()">Entrar</button>
                 </div>
             </div>
             <div class="rooms-list" id="rooms-list"></div>
         </div>
 
-        <div class="chat-area">
+        <div class="chat-area" id="chat-area">
             <div class="chat-header">
-                <div>
-                    <div class="room-title" id="current-room-name">Selecione uma sala</div>
+                <div class="header-left">
+                    <button class="back-btn" onclick="backToRooms()">←</button>
+                    <div>
+                        <div class="room-title" id="current-room-name">Sala</div>
+                    </div>
                 </div>
                 <div class="status">
                     <div class="status-dot" id="status-dot"></div>
@@ -496,12 +546,41 @@ body {
 
     <div class="modal" id="new-room-modal">
         <div class="modal-content">
-            <h2>Nova Sala</h2>
+            <h2>Criar Nova Sala</h2>
             <input type="text" class="modal-input" id="room-name-input" placeholder="Nome da sala">
             <input type="password" class="modal-input" id="room-password-input" placeholder="Senha (opcional)">
             <div class="modal-buttons">
                 <button class="modal-btn secondary" onclick="closeNewRoomModal()">Cancelar</button>
                 <button class="modal-btn primary" onclick="createRoom()">Criar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="join-room-modal">
+        <div class="modal-content">
+            <h2>Entrar em Sala</h2>
+            <input type="text" class="modal-input" id="join-room-id" placeholder="ID da sala">
+            <input type="password" class="modal-input" id="join-room-password" placeholder="Senha (se necessário)">
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeJoinRoomModal()">Cancelar</button>
+                <button class="modal-btn primary" onclick="joinRoom()">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="room-info-modal">
+        <div class="modal-content">
+            <h2>Informações da Sala</h2>
+            <div class="modal-info">
+                <strong>ID da Sala:</strong><br>
+                <span id="show-room-id"></span>
+            </div>
+            <p style="font-size: 12px; color: #888; margin-bottom: 15px;">
+                Compartilhe este ID para outras pessoas entrarem na sala
+            </p>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="copyRoomId()">Copiar ID</button>
+                <button class="modal-btn primary" onclick="closeRoomInfoModal()">Fechar</button>
             </div>
         </div>
     </div>
@@ -515,15 +594,14 @@ const state = {
     userId: localStorage.getItem('userId') || crypto.randomUUID(),
     username: localStorage.getItem('username') || 'Anônimo',
     avatar: localStorage.getItem('avatar') || null,
-    currentRoom: 'global',
-    rooms: JSON.parse(localStorage.getItem('rooms') || '{"global":{"name":"Global","password":null,"messages":[]}}'),
+    currentRoom: null,
+    rooms: JSON.parse(localStorage.getItem('rooms') || '{"global":{"id":"global","name":"Global","password":null,"messages":[]}}'),
     replyTo: null,
     ws: null,
     connected: false
 }
 
 localStorage.setItem('userId', state.userId)
-
 document.getElementById('username').value = state.username
 
 function compressImage(file, maxSizeMB = 2) {
@@ -588,8 +666,10 @@ function connectWS() {
     state.ws.onopen = () => {
         state.connected = true
         updateStatus('Conectado', true)
-        sendToServer({ type: 'join', room: state.currentRoom, userId: state.userId })
-        syncMessages()
+        if (state.currentRoom) {
+            sendToServer({ type: 'join', room: state.currentRoom, userId: state.userId })
+            syncMessages()
+        }
     }
     
     state.ws.onclose = () => {
@@ -617,6 +697,7 @@ function handleMessage(data) {
                 addMessage(data)
             }
             saveMessage(data)
+            updateRoomsList()
             break
         case 'sync':
             if (data.messages) {
@@ -628,9 +709,7 @@ function handleMessage(data) {
 }
 
 function saveMessage(msg) {
-    if (!state.rooms[msg.room]) {
-        state.rooms[msg.room] = { name: msg.room, password: null, messages: [] }
-    }
+    if (!state.rooms[msg.room]) return
     if (!state.rooms[msg.room].messages.find(m => m.id === msg.id)) {
         state.rooms[msg.room].messages.push(msg)
         localStorage.setItem('rooms', JSON.stringify(state.rooms))
@@ -659,7 +738,7 @@ function addMessage(msg) {
     if (msg.replyTo) {
         const original = state.rooms[state.currentRoom]?.messages.find(m => m.id === msg.replyTo)
         if (original) {
-            replyHtml = `<div class="reply-indicator">${original.username}: ${original.message.substring(0, 50)}...</div>`
+            replyHtml = `<div class="reply-indicator">${original.username}: ${escapeHtml(original.message.substring(0, 50))}...</div>`
         }
     }
     
@@ -669,7 +748,7 @@ function addMessage(msg) {
         </div>
         <div class="message-content">
             <div class="message-header">
-                <strong>${msg.username}</strong>
+                <strong>${escapeHtml(msg.username)}</strong>
                 <span>${time}</span>
             </div>
             <div class="message-bubble">
@@ -697,7 +776,7 @@ function scrollToBottom() {
 function sendMessage() {
     const input = document.getElementById('message-input')
     const msg = input.value.trim()
-    if (!msg || !state.connected) return
+    if (!msg || !state.connected || !state.currentRoom) return
     
     const message = {
         type: 'chat',
@@ -762,23 +841,66 @@ function openNewRoomModal() {
     document.getElementById('new-room-modal').classList.add('active')
 }
 
-function closeNewRoomModal() {
+        function closeNewRoomModal() {
     document.getElementById('new-room-modal').classList.remove('active')
+    document.getElementById('room-name-input').value = ''
+    document.getElementById('room-password-input').value = ''
 }
 
 function createRoom() {
     const name = document.getElementById('room-name-input').value.trim()
     const password = document.getElementById('room-password-input').value
     
-    if (!name) return
+    if (!name) return alert('Digite um nome para a sala')
     
-    const roomId = name.toLowerCase().replace(/\s+/g, '-')
-    state.rooms[roomId] = { name, password, messages: [] }
+    const roomId = crypto.randomUUID()
+    state.rooms[roomId] = { id: roomId, name, password, messages: [] }
     localStorage.setItem('rooms', JSON.stringify(state.rooms))
     
     closeNewRoomModal()
     renderRooms()
+    
+    document.getElementById('show-room-id').textContent = roomId
+    document.getElementById('room-info-modal').classList.add('active')
+}
+
+function openJoinRoomModal() {
+    document.getElementById('join-room-modal').classList.add('active')
+}
+
+function closeJoinRoomModal() {
+    document.getElementById('join-room-modal').classList.remove('active')
+    document.getElementById('join-room-id').value = ''
+    document.getElementById('join-room-password').value = ''
+}
+
+function joinRoom() {
+    const roomId = document.getElementById('join-room-id').value.trim()
+    const password = document.getElementById('join-room-password').value
+    
+    if (!roomId) return alert('Digite o ID da sala')
+    
+    if (state.rooms[roomId]) {
+        return alert('Você já está nesta sala!')
+    }
+    
+    state.rooms[roomId] = { id: roomId, name: 'Sala ' + roomId.substring(0, 8), password, messages: [] }
+    localStorage.setItem('rooms', JSON.stringify(state.rooms))
+    
+    closeJoinRoomModal()
+    renderRooms()
     switchRoom(roomId)
+}
+
+function closeRoomInfoModal() {
+    document.getElementById('room-info-modal').classList.remove('active')
+}
+
+function copyRoomId() {
+    const id = document.getElementById('show-room-id').textContent
+    navigator.clipboard.writeText(id).then(() => {
+        alert('ID copiado!')
+    })
 }
 
 function renderRooms() {
@@ -787,25 +909,43 @@ function renderRooms() {
     
     Object.entries(state.rooms).forEach(([id, room]) => {
         const div = document.createElement('div')
-        div.className = `room-item ${id === state.currentRoom ? 'active' : ''}`
+        div.className = 'room-item'
         div.onclick = () => switchRoom(id)
         div.innerHTML = `
-            <div class="room-name">${room.name}</div>
+            <div class="room-name">
+                <span>${escapeHtml(room.name)}</span>
+                ${room.id !== 'global' ? `<span class="room-id">#${room.id.substring(0, 8)}</span>` : ''}
+            </div>
             <div class="room-info">${room.messages.length} mensagens</div>
         `
         list.appendChild(div)
     })
 }
 
+function updateRoomsList() {
+    renderRooms()
+}
+
 function switchRoom(roomId) {
+    if (!state.rooms[roomId]) return
+    
     state.currentRoom = roomId
     document.getElementById('current-room-name').textContent = state.rooms[roomId].name
-    renderRooms()
     renderMessages()
+    
+    document.getElementById('sidebar').classList.add('hidden')
+    document.getElementById('chat-area').classList.add('active')
+    
     if (state.connected) {
         sendToServer({ type: 'join', room: roomId, userId: state.userId })
         syncMessages()
     }
+}
+
+function backToRooms() {
+    document.getElementById('sidebar').classList.remove('hidden')
+    document.getElementById('chat-area').classList.remove('active')
+    state.currentRoom = null
 }
 
 function renderMessages() {
@@ -819,7 +959,6 @@ if (state.avatar) {
 }
 
 renderRooms()
-switchRoom('global')
 connectWS()
     </script>
 </body>
